@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartFemX Infinity</title>
+    <!-- Import model-viewer component -->
+    <script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/model-viewer/3.1.0/model-viewer.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #ff69b4, #9370db);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .model-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 2rem 0;
+        }
+        
+        .model-viewer-container {
+            width: 100%;
+            height: 500px;
+            background-color: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            --poster-color: #ffffff;
+        }
+        
+        .image-gallery {
+            display: flex;
+            justify-content: space-between;
+            margin: 3rem 0;
+            gap: 2rem;
+        }
+        
+        .image-container {
+            flex: 1;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+        
+        .image-container img:hover {
+            transform: scale(1.05);
+        }
+        
+        .features {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .features h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: #9370db;
+            text-align: center;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #ff69b4;
+        }
+        
+        .feature-title {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .feature-description {
+            color: #666;
+        }
+        
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #ff69b4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        .progress-container {
+            width: 300px;
+            height: 20px;
+            background-color: #f3f3f3;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff69b4, #9370db);
+            transition: width 0.3s ease;
+        }
+        
+        .progress-text {
+            font-size: 14px;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .loading-status {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #333;
+            z-index: 5;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hotspot {
+            display: block;
+            width: 20px;
+            height: 20px;
+            border-radius: 10px;
+            border: none;
+            background-color: #ff69b4;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+            --min-hotspot-opacity: 0.8;
+            transform: translateX(-50%) translateY(-50%);
+        }
+        
+        .hotspot:not([data-visible]) {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .annotation {
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+            color: rgba(0, 0, 0, 0.8);
+            display: block;
+            font-family: Futura, Helvetica Neue, sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            max-width: 200px;
+            overflow-wrap: break-word;
+            padding: 8px;
+            position: absolute;
+            width: max-content;
+            transform: translate(10px, 10px);
+            z-index: 1;
+        }
+        
+        .model-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #9370db;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .image-gallery {
+                flex-direction: column;
+            }
+            
+            .feature-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loading-screen">
+        <div class="spinner"></div>
+        <div class="progress-container">
+            <div class="progress-bar" id="main-progress-bar"></div>
+        </div>
+        <div class="progress-text" id="main-progress-text">Loading: 0%</div>
+    </div>
+    
+    <header>
+        <h1>SmartFemX Infinity</h1>
+        <p class="subtitle">Revolutionary Smart Menstrual Cup</p>
+    </header>
+    
+    <div class="container">
+        <div class="model-container">
+            <h2 class="model-title">SmartFemX Cup</h2>
+            <div class="model-viewer-container">
+                <model-viewer 
+                    id="cup-model" 
+                    src="cup.glb" 
+                    alt="SmartFemX Infinity 3D Model" 
+                    shadow-intensity="1" 
+                    camera-controls 
+                    auto-rotate 
+                    touch-action="pan-y" 
+                    loading="eager"
+                    ar
+                    ar-modes="webxr scene-viewer quick-look"
+                    poster="/api/placeholder/400/320">
+                    <div class="loading-status" id="cup-loading-status">Loading model...</div>
+                    
+                    <!-- Hotspots for features -->
+                    <button slot="hotspot-1" class="hotspot" data-position="0 0.02 0" data-normal="0 1 0">
+                        <div class="annotation">Smart Sensors</div>
+                    </button>
+                    <button slot="hotspot-2" class="hotspot" data-position="0 -0.02 0" data-normal="0 -1 0">
+                        <div class="annotation">Wireless Charging Base</div>
+                    </button>
+                    <button slot="hotspot-3" class="hotspot" data-position="0.02 0 0" data-normal="1 0 0">
+                        <div class="annotation">Flow Analyzer</div>
+                    </button>
+                </model-viewer>
+            </div>
+            
+            <h2 class="model-title">Standard Wireless Charger</h2>
+            <div class="model-viewer-container">
+                <model-viewer 
+                    id="charger-model" 
+                    src="charger.glb" 
+                    alt="SmartFemX Wireless Charger" 
+                    shadow-intensity="1" 
+                    camera-controls 
+                    auto-rotate 
+                    touch-action="pan-y" 
+                    loading="eager"
+                    ar
+                    ar-modes="webxr scene-viewer quick-look"
+                    poster="/api/placeholder/400/320">
+                    <div class="loading-status" id="charger-loading-status">Loading model...</div>
+                    
+                    <!-- Hotspots for charger features -->
+                    <button slot="hotspot-1" class="hotspot" data-position="0 0.01 0" data-normal="0 1 0">
+                        <div class="annotation">Charging Surface</div>
+                    </button>
+                    <button slot="hotspot-2" class="hotspot" data-position="0 -0.01 0" data-normal="0 -1 0">
+                        <div class="annotation">USB-C Connection</div>
+                    </button>
+                </model-viewer>
+            </div>
+            
+            <h2 class="model-title">Fast Wireless Charger</h2>
+            <div class="model-viewer-container">
+                <model-viewer 
+                    id="fcharger-model" 
+                    src="fcharger.glb" 
+                    alt="SmartFemX Fast Wireless Charger" 
+                    shadow-intensity="1" 
+                    camera-controls 
+                    auto-rotate 
+                    touch-action="pan-y" 
+                    loading="eager"
+                    ar
+                    ar-modes="webxr scene-viewer quick-look"
+                    poster="/api/placeholder/400/320">
+                    <div class="loading-status" id="fcharger-loading-status">Loading model...</div>
+                    
+                    <!-- Hotspots for fast charger features -->
+                    <button slot="hotspot-1" class="hotspot" data-position="0 0.01 0" data-normal="0 1 0">
+                        <div class="annotation">Fast Charging Surface</div>
+                    </button>
+                    <button slot="hotspot-2" class="hotspot" data-position="0 -0.01 0" data-normal="0 -1 0">
+                        <div class="annotation">USB-C PD Connection</div>
+                    </button>
+                    <button slot="hotspot-3" class="hotspot" data-position="0.02 0 0" data-normal="1 0 0">
+                        <div class="annotation">LED Indicator</div>
+                    </button>
+                </model-viewer>
+            </div>
+        </div>
+        
+        <div class="image-gallery">
+            <div class="image-container">
+                <img src="image1c.jpg" alt="SmartFemX Infinity Image 1">
+            </div>
+            <div class="image-container">
+                <img src="imagefc1.jpg" alt="SmartFemX Infinity Image 2">
+            </div>
+        </div>
+        
+        <div class="features">
+            <h2>Key Features</h2>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="feature-icon">🌡️</div>
+                    <h3 class="feature-title">Live Monitoring</h3>
+                    <p class="feature-description">Advanced sensors track and detect potential infections and provide health insights.</p>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">📱</div>
+                    <h3 class="feature-title">Smart App Integration</h3>
+                    <p class="feature-description">Connect to our smartphone app for real-time monitoring and personalized health recommendations.</p>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">🔋</div>
+                    <h3 class="feature-title">Long Battery Life</h3>
+                    <p class="feature-description">Lasts up to 12 hours on a single charge, with wireless charging capabilities.</p>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">💧</div>
+                    <h3 class="feature-title">Cup Cleaner</h3>
+                    <p class="feature-description">Analyzes and clean the cup and kill most of the bacteria.</p>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">🔔</div>
+                    <h3 class="feature-title">Smart Alerts</h3>
+                    <p class="feature-description">Sends notifications when it's time to empty or replace the cup.</p>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">🌱</div>
+                    <h3 class="feature-title">Eco-Friendly</h3>
+                    <p class="feature-description">Made from medical-grade silicone that's safe for your body and the environment.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 SmartFemX Infinity. All rights reserved.by batman</p>
+    </footer>
+    
+    <script>
+        // Main page loading
+        window.addEventListener('load', function() {
+            const mainProgressBar = document.getElementById('main-progress-bar');
+            const mainProgressText = document.getElementById('main-progress-text');
+            
+            // Simulate initial loading progress
+            let progress = 0;
+            const interval = setInterval(function() {
+                progress += 5;
+                mainProgressBar.style.width = progress + '%';
+                mainProgressText.textContent = 'Loading: ' + progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(function() {
+                        document.getElementById('loading-screen').style.opacity = '0';
+                        setTimeout(function() {
+                            document.getElementById('loading-screen').style.display = 'none';
+                        }, 500);
+                    }, 300);
+                }
+            }, 100);
+        });
+        
+        // Model viewer loading status handlers
+        function setupModelViewer(modelId, statusId) {
+            const modelViewer = document.getElementById(modelId);
+            const loadingStatus = document.getElementById(statusId);
+            
+            // Update loading status while the model loads
+            modelViewer.addEventListener('progress', (event) => {
+                const progress = Math.floor(event.detail.totalProgress * 100);
+                loadingStatus.textContent = `Loading model: ${progress}%`;
+            });
+            
+            // Hide loading status when model is loaded
+            modelViewer.addEventListener('load', () => {
+                loadingStatus.style.opacity = '0';
+                setTimeout(() => {
+                    loadingStatus.style.display = 'none';
+                }, 300);
+            });
+            
+            // Display error if model fails to load
+            modelViewer.addEventListener('error', () => {
+                loadingStatus.textContent = 'Error loading model!';
+                loadingStatus.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
+                loadingStatus.style.color = 'red';
+            });
+        }
+        
+        // Setup event handlers for all model viewers
+        setupModelViewer('cup-model', 'cup-loading-status');
+        setupModelViewer('charger-model', 'charger-loading-status');
+        setupModelViewer('fcharger-model', 'fcharger-loading-status');
+    </script>
+</body>
+</html>

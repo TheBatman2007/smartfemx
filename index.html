@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartFemX Infinity - Login</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #ff69b4, #9370db);
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+        }
+        
+        h1 {
+            font-size: 2rem;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .main-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        
+        .auth-container {
+            width: 100%;
+            max-width: 400px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 2rem;
+            position: relative;
+        }
+        
+        .form-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            color: #9370db;
+            border-bottom: 3px solid #9370db;
+        }
+        
+        .form-container {
+            display: none;
+        }
+        
+        .form-container.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #9370db;
+        }
+        
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #ff69b4, #9370db);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+        
+        button:hover {
+            opacity: 0.9;
+        }
+        
+        .forgot-password {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        
+        .forgot-password a {
+            color: #9370db;
+            text-decoration: none;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            background-color: rgba(231, 76, 60, 0.1);
+            padding: 0.5rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .success-message {
+            color: #2ecc71;
+            background-color: rgba(46, 204, 113, 0.1);
+            padding: 0.5rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .back-to-site {
+            position: absolute;
+            top: -2rem;
+            left: 0;
+            color: #9370db;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        .back-to-site:before {
+            content: "←";
+            margin-right: 0.5rem;
+        }
+        
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+        }
+        
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SmartFemX Infinity </h1>
+        <p class="subtitle">Revolutionary Smart Menstrual Cup by HERMIONE
+        </p>
+    </header>
+    
+    <div class="main-container">
+        <div class="auth-container">
+            <a href="index.html" class="back-to-site">Back to main site</a>
+            
+            <div class="form-tabs">
+                <div class="tab active" id="login-tab">Login</div>
+                <div class="tab" id="signup-tab">Create Account</div>
+            </div>
+            
+            <div class="error-message" id="error-message"></div>
+            <div class="success-message" id="success-message"></div>
+            
+            <div class="form-container active" id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" placeholder="Enter your password">
+                </div>
+                
+                <button id="login-button">Login</button>
+                
+                <div class="forgot-password">
+                    <a href="#" id="forgot-password-link">Forgot password?</a>
+                </div>
+            </div>
+            
+            <div class="form-container" id="signup-form">
+                <div class="form-group">
+                    <label for="signup-name">Full Name</label>
+                    <input type="text" id="signup-name" placeholder="Enter your full name ex. batman">
+                </div>
+                
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" placeholder="Create a password (min. 6 characters)">
+                </div>
+                
+                <div class="form-group">
+                    <label for="signup-confirm-password">Confirm Password</label>
+                    <input type="password" id="signup-confirm-password" placeholder="Confirm your password">
+                </div>
+                
+                <button id="signup-button">Create Account</button>
+            </div>
+            
+            <div class="form-container" id="reset-form">
+                <div class="form-group">
+                    <label for="reset-email">Email</label>
+                    <input type="email" id="reset-email" placeholder="Enter your email">
+                </div>
+                
+                <button id="reset-button">Reset Password</button>
+                
+                <div class="forgot-password">
+                    <a href="#" id="back-to-login-link">Back to login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 SmartFemX Infinity. All rights reserved.by batman</p>
+    </footer>
+    
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBN9oUtx5JQ8yu0wJdWISwG-3X1zF52Y7o",
+            authDomain: "login-page-smart-fem.firebaseapp.com",
+            projectId: "login-page-smart-fem",
+            storageBucket: "login-page-smart-fem.firebasestorage.app",
+            messagingSenderId: "593766041873",
+            appId: "1:593766041873:web:ad5982efa7aaecb8b0a4b0"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        
+        // DOM Elements
+        const loginTab = document.getElementById('login-tab');
+        const signupTab = document.getElementById('signup-tab');
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const resetForm = document.getElementById('reset-form');
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+        const backToLoginLink = document.getElementById('back-to-login-link');
+        
+        // Login and Sign Up buttons
+        const loginButton = document.getElementById('login-button');
+        const signupButton = document.getElementById('signup-button');
+        const resetButton = document.getElementById('reset-button');
+        
+        // Tab switching logic
+        loginTab.addEventListener('click', () => {
+            loginTab.classList.add('active');
+            signupTab.classList.remove('active');
+            loginForm.classList.add('active');
+            signupForm.classList.remove('active');
+            resetForm.classList.remove('active');
+            clearMessages();
+        });
+        
+        signupTab.addEventListener('click', () => {
+            signupTab.classList.add('active');
+            loginTab.classList.remove('active');
+            signupForm.classList.add('active');
+            loginForm.classList.remove('active');
+            resetForm.classList.remove('active');
+            clearMessages();
+        });
+        
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginForm.classList.remove('active');
+            signupForm.classList.remove('active');
+            resetForm.classList.add('active');
+            clearMessages();
+        });
+        
+        backToLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            resetForm.classList.remove('active');
+            loginForm.classList.add('active');
+            loginTab.classList.add('active');
+            signupTab.classList.remove('active');
+            clearMessages();
+        });
+        
+        // Clear error and success messages
+        function clearMessages() {
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+        }
+        
+        // Show error message
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        }
+        
+        // Show success message
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+        
+        // Login functionality
+        loginButton.addEventListener('click', () => {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!email || !password) {
+                showError('Please fill in all fields');
+                return;
+            }
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Successful login
+                    showSuccess('Login successful! Redirecting...');
+                    setTimeout(() => {
+                        window.location.href = 'main.html'; // Redirect to main.html
+                    }, 1500);
+                })
+                .catch((error) => {
+                    // Handle errors
+                    let errorMsg = 'Login failed. Please try again.';
+                    if (error.code === 'auth/user-not-found') {
+                        errorMsg = 'No account found with this email.';
+                    } else if (error.code === 'auth/wrong-password') {
+                        errorMsg = 'Incorrect password.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMsg = 'Invalid email format.';
+                    }
+                    showError(errorMsg);
+                });
+        });
+        
+        // Sign up functionality
+        signupButton.addEventListener('click', () => {
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('signup-confirm-password').value;
+            
+            if (!name || !email || !password || !confirmPassword) {
+                showError('Please fill in all fields');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showError('Passwords do not match');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters');
+                return;
+            }
+            
+            // Create user
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Update profile
+                    return userCredential.user.updateProfile({
+                        displayName: name
+                    }).then(() => {
+                        showSuccess('Account created successfully! You can now login.');
+                        
+                        // Clear form fields
+                        document.getElementById('signup-name').value = '';
+                        document.getElementById('signup-email').value = '';
+                        document.getElementById('signup-password').value = '';
+                        document.getElementById('signup-confirm-password').value = '';
+                        
+                        // Switch to login tab after a delay
+                        setTimeout(() => {
+                            loginTab.click();
+                        }, 2000);
+                    });
+                })
+                .catch((error) => {
+                    // Handle errors
+                    let errorMsg = 'Sign up failed. Please try again.';
+                    if (error.code === 'auth/email-already-in-use') {
+                        errorMsg = 'Email is already in use.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMsg = 'Invalid email format.';
+                    } else if (error.code === 'auth/weak-password') {
+                        errorMsg = 'Password is too weak.';
+                    }
+                    showError(errorMsg);
+                });
+        });
+        
+        // Password reset functionality
+        resetButton.addEventListener('click', () => {
+            const email = document.getElementById('reset-email').value;
+            
+            if (!email) {
+                showError('Please enter your email');
+                return;
+            }
+            
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    showSuccess('Password reset email sent. Check your inbox.');
+                    document.getElementById('reset-email').value = '';
+                })
+                .catch((error) => {
+                    let errorMsg = 'Password reset failed. Please try again.';
+                    if (error.code === 'auth/user-not-found') {
+                        errorMsg = 'No account found with this email.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMsg = 'Invalid email format.';
+                    }
+                    showError(errorMsg);
+                });
+        });
+        
+        // Check if user is already logged in
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // User is signed in, redirect to main.html
+                window.location.href = 'main.html';
+            }
+        });
+    </script>
+</body>
+</html>
